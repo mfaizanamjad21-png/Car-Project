@@ -59,7 +59,7 @@ export default function App() {
     });
 
   return (
-    <Router>
+   <Router basename='/Car-Project'>
       <div className="App">
         <header className="navbar">
           <h1>CarHub</h1>
