@@ -4,14 +4,16 @@ import './CarDetails.css';
 
 export default function CarDetails({ cars }) {
   const { id } = useParams();
-  
-  // Find the car matching the URL parameter ID
-  const car = cars?.find((item) => item.id === parseInt(id));
+
+  const car = cars?.find(
+    (item) => String(item.id) === String(id)
+  );
 
   if (!car) {
     return (
       <div className="details-container">
         <h2>Car Not Found</h2>
+
         <Link to="/">Back to Home</Link>
       </div>
     );
@@ -19,14 +21,43 @@ export default function CarDetails({ cars }) {
 
   return (
     <div className="details-container">
-      <Link to="/" className="back-btn">&larr; Back to Cars</Link>
+      <Link to="/" className="back-btn">
+        &larr; Back to Cars
+      </Link>
+
       <div className="details-content">
-        <img src={car.image} alt={car.name} className="details-image" />
+        <img
+          src={car.image}
+          alt={car.name}
+          className="details-image"
+        />
+
         <div className="details-info">
           <h2>{car.name}</h2>
-          <p><strong>Year:</strong> {car.year}</p>
-          <p><strong>Price:</strong> ${car.price.toLocaleString()}</p>
-          <p><strong>Description:</strong> Premium vehicle equipped with advanced performance and security features.</p>
+
+          <p>
+            <strong>Make:</strong> {car.make}
+          </p>
+
+          <p>
+            <strong>Model:</strong> {car.model}
+          </p>
+
+          <p>
+            <strong>Year:</strong> {car.year}
+          </p>
+
+          <p>
+            <strong>Price:</strong>{' '}
+            {car.price !== null
+              ? `$${car.price.toLocaleString()}`
+              : 'Not available'}
+          </p>
+
+          <p>
+            <strong>Description:</strong> Vehicle information
+            provided through the NHTSA vPIC public API.
+          </p>
         </div>
       </div>
     </div>
