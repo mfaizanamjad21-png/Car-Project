@@ -14,7 +14,9 @@ export default function CarDetails({ cars }) {
       <div className="details-container">
         <h2>Car Not Found</h2>
 
-        <Link to="/">Back to Home</Link>
+        <Link to="/" className="back-btn">
+          Back to Home
+        </Link>
       </div>
     );
   }
@@ -56,7 +58,7 @@ export default function CarDetails({ cars }) {
 
           <p>
             <strong>Description:</strong> Vehicle information
-            provided through the NHTSA vPIC public API.
+            provided by the NHTSA vPIC public API.
           </p>
         </div>
       </div>

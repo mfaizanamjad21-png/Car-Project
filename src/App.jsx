@@ -4,36 +4,6 @@ import './App.css';
 import CarCard from './Components/CarCard/CarCard';
 import CarDetails from './Components/CarCard/CarDetails/CarDetails';
 
-const MAKES = [
-  'Toyota',
-  'Honda',
-  'Ford',
-  'Chevrolet',
-  'BMW',
-  'Nissan',
-  'Hyundai',
-  'Kia'
-];
-
-const CAR_IMAGES = {
-  Toyota:
-    'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb',
-  Honda:
-    'https://images.unsplash.com/photo-1590362891991-f776e747a588',
-  BMW:
-    'https://images.unsplash.com/photo-1555215695-3004980ad54e',
-  Ford:
-    'https://images.unsplash.com/photo-1494905998402-395d579af36f',
-  Chevrolet:
-    'https://images.unsplash.com/photo-1553440569-bcc63803a83d',
-  Nissan:
-    'https://images.unsplash.com/photo-1542362567-b07e54358753',
-  Hyundai:
-    'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6',
-  Kia:
-    'https://images.unsplash.com/photo-1606016159991-dfe4f2746f3f'
-};
-
 export default function App() {
   const [cars, setCars] = useState([]);
   const [search, setSearch] = useState('');
@@ -47,28 +17,47 @@ export default function App() {
         setLoading(true);
         setError('');
 
-        const requests = MAKES.map(async (make) => {
+        // Get vehicle makes directly from the public NHTSA API
+        const makesResponse = await fetch(
+          'https://vpic.nhtsa.dot.gov/api/vehicles/GetAllMakes?format=json'
+        );
+
+        if (!makesResponse.ok) {
+          throw new Error('Unable to load vehicle makes.');
+        }
+
+        const makesData = await makesResponse.json();
+
+        // Use actual API results instead of hardcoded car makes
+        const selectedMakes = makesData.Results
+          .filter((make) => make.Make_Name)
+          .slice(0, 8);
+
+        const requests = selectedMakes.map(async (make) => {
           const response = await fetch(
             `https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${encodeURIComponent(
-              make
+              make.Make_Name
             )}/modelyear/2024?format=json`
           );
 
           if (!response.ok) {
-            throw new Error(`Failed to fetch ${make}`);
+            return [];
           }
 
           const data = await response.json();
 
-          return data.Results.map((vehicle, index) => ({
-            id: `${make}-${vehicle.Model_ID}-${index}`,
+          return data.Results.slice(0, 10).map((vehicle, index) => ({
+            id: `${vehicle.Make_ID}-${vehicle.Model_ID}-${index}`,
             name: `${vehicle.Make_Name} ${vehicle.Model_Name}`,
             make: vehicle.Make_Name,
             model: vehicle.Model_Name,
             year: 2024,
+
+            // NHTSA does not provide vehicle sale prices.
             price: null,
+
+            // NHTSA does not provide vehicle photographs.
             image:
-              CAR_IMAGES[vehicle.Make_Name] ||
               'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7'
           }));
         });
@@ -85,6 +74,10 @@ export default function App() {
                   item.name.toLowerCase() === car.name.toLowerCase()
               )
           );
+
+        if (allCars.length === 0) {
+          throw new Error('No vehicles were returned by the API.');
+        }
 
         setCars(allCars);
       } catch (err) {
@@ -103,13 +96,13 @@ export default function App() {
       car.name.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) => {
-      if (sortBy === 'newest') return b.year - a.year;
-      if (sortBy === 'oldest') return a.year - b.year;
+      if (sortBy === 'newest') {
+        return b.year - a.year;
+      }
 
-      // NHTSA does not provide vehicle prices,
-      // so price sorting is intentionally not performed.
-      if (sortBy === 'price-low') return 0;
-      if (sortBy === 'price-high') return 0;
+      if (sortBy === 'oldest') {
+        return a.year - b.year;
+      }
 
       return 0;
     });
@@ -167,27 +160,23 @@ export default function App() {
                         onChange={(event) =>
                           setSortBy(event.target.value)
                         }
-                        aria-label="Sort cars by year or price"
+                        aria-label="Sort cars by year"
                       >
                         <option value="">Sort Cars</option>
+
                         <option value="newest">
                           Year: Newest First
                         </option>
+
                         <option value="oldest">
                           Year: Oldest First
-                        </option>
-                        <option value="price-low">
-                          Price: Low to High
-                        </option>
-                        <option value="price-high">
-                          Price: High to Low
                         </option>
                       </select>
                     </div>
 
                     {loading && (
                       <p className="no-results">
-                        Loading cars...
+                        Loading cars from API...
                       </p>
                     )}
 
