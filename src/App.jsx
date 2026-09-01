@@ -1,232 +1,653 @@
-import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import './App.css';
-import CarCard from './Components/CarCard/CarCard';
-import CarDetails from './Components/CarCard/CarDetails/CarDetails';
+import { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+} from "react-router-dom";
 
-export default function App() {
+import "./App.css";
+
+import CarCard from "./Components/CarCard/CarCard";
+import CarDetails from "./Components/CarCard/CarDetails/CarDetails";
+import Navbar from "./Components/Navbar/Navbar";
+
+import Explore from "./Pages/Explore";
+import Garage from "./Pages/Garage";
+import CompareCars from "./Pages/CompareCars";
+import Reviews from "./Pages/Reviews";
+import FuelCalculator from "./Pages/FuelCalculator";
+
+function App() {
+  // ==========================================
+  // STATE
+  // ==========================================
+
   const [cars, setCars] = useState([]);
-  const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        setLoading(true);
-        setError('');
+  const [favorites, setFavorites] = useState([]);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
 
-        // Get vehicle makes directly from the public NHTSA API
-        const makesResponse = await fetch(
-          'https://vpic.nhtsa.dot.gov/api/vehicles/GetAllMakes?format=json'
+  // ==========================================
+  // FEATURED CARS
+  // ==========================================
+
+  const staticCars = [
+    {
+      id: "toyota-camry",
+      name: "Toyota Camry",
+      make: "Toyota",
+      model: "Camry",
+      year: 2024,
+      price: 28000,
+      image:
+        "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=900&q=80",
+    },
+
+    {
+      id: "honda-civic",
+      name: "Honda Civic",
+      make: "Honda",
+      model: "Civic",
+      year: 2024,
+      price: 26000,
+      image:
+        "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=900&q=80",
+    },
+
+    {
+      id: "bmw-3-series",
+      name: "BMW 3 Series",
+      make: "BMW",
+      model: "3 Series",
+      year: 2024,
+      price: 45000,
+      image:
+        "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=900&q=80",
+    },
+  ];
+
+  // ==========================================
+  // PRICE RANGES
+  // ==========================================
+
+  const priceMap = {
+    toyota: [25000, 45000],
+    honda: [24000, 35000],
+    ford: [28000, 55000],
+    bmw: [45000, 80000],
+    mercedes: [50000, 90000],
+    audi: [42000, 85000],
+    nissan: [22000, 40000],
+    chevrolet: [23000, 50000],
+    lexus: [40000, 75000],
+    hyundai: [22000, 40000],
+    kia: [22000, 42000],
+    mazda: [24000, 40000],
+    subaru: [25000, 42000],
+    volkswagen: [25000, 50000],
+  };
+
+  // ==========================================
+  // GET CAR IMAGE
+  // ==========================================
+
+  const getCarImage = (make, model, year = 2024) => {
+    const cleanMake = encodeURIComponent(
+      String(make || "").trim()
+    );
+
+    const cleanModel = encodeURIComponent(
+      String(model || "").trim()
+    );
+
+    return `https://carapi.trustcar.info/getImage?make=${cleanMake}&model=${cleanModel}&year=${year}`;
+  };
+
+  // ==========================================
+  // SEARCH FUNCTION
+  // ==========================================
+
+  const handleSearch = async () => {
+    const searchValue = search.trim();
+
+    // Don't search if empty
+    if (!searchValue) {
+      setError("Please enter a car make.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      // ----------------------------------------
+      // GET MAKE
+      // ----------------------------------------
+
+      const make = searchValue
+        .split(" ")[0]
+        .toLowerCase();
+
+      // ----------------------------------------
+      // NHTSA API
+      // ----------------------------------------
+
+      const apiUrl =
+        `https://vpic.nhtsa.dot.gov/api/vehicles/` +
+        `getmodelsformake/${encodeURIComponent(make)}` +
+        `?format=json`;
+
+      const response = await fetch(apiUrl);
+
+      if (!response.ok) {
+        throw new Error("API request failed");
+      }
+
+      const data = await response.json();
+
+      // ----------------------------------------
+      // CHECK RESULTS
+      // ----------------------------------------
+
+      if (
+        !data.Results ||
+        data.Results.length === 0
+      ) {
+        setCars([]);
+        setError(
+          `No cars found for "${searchValue}".`
         );
+        return;
+      }
 
-        if (!makesResponse.ok) {
-          throw new Error('Unable to load vehicle makes.');
-        }
+      // ----------------------------------------
+      // PRICE RANGE
+      // ----------------------------------------
 
-        const makesData = await makesResponse.json();
+      const [minPrice, maxPrice] =
+        priceMap[make] || [20000, 60000];
 
-        // Use actual API results instead of hardcoded car makes
-        const selectedMakes = makesData.Results
-          .filter((make) => make.Make_Name)
-          .slice(0, 8);
+      // ----------------------------------------
+      // CREATE CAR DATA
+      // ----------------------------------------
 
-        const requests = selectedMakes.map(async (make) => {
-          const response = await fetch(
-            `https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${encodeURIComponent(
-              make.Make_Name
-            )}/modelyear/2024?format=json`
+      const apiCars = data.Results
+        .slice(0, 8)
+        .map((model, index) => {
+          const makeName =
+            model.Make_Name || searchValue;
+
+          const modelName =
+            model.Model_Name || "Unknown Model";
+
+          const year = 2024;
+
+          const randomPrice = Math.floor(
+            Math.random() *
+              (maxPrice - minPrice + 1) +
+              minPrice
           );
 
-          if (!response.ok) {
-            return [];
-          }
+          return {
+            id: `${model.Make_ID}-${model.Model_ID}-${index}`,
 
-          const data = await response.json();
+            name: `${makeName} ${modelName}`,
 
-          return data.Results.slice(0, 10).map((vehicle, index) => ({
-            id: `${vehicle.Make_ID}-${vehicle.Model_ID}-${index}`,
-            name: `${vehicle.Make_Name} ${vehicle.Model_Name}`,
-            make: vehicle.Make_Name,
-            model: vehicle.Model_Name,
-            year: 2024,
+            make: makeName,
 
-            // NHTSA does not provide vehicle sale prices.
-            price: null,
+            model: modelName,
 
-            // NHTSA does not provide vehicle photographs.
-            image:
-              'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7'
-          }));
+            year: year,
+
+            price: randomPrice,
+
+            image: getCarImage(
+              makeName,
+              modelName,
+              year
+            ),
+          };
         });
 
-        const results = await Promise.all(requests);
+      // ----------------------------------------
+      // DISPLAY RESULTS
+      // ----------------------------------------
 
-        const allCars = results
-          .flat()
-          .filter(
-            (car, index, array) =>
-              index ===
-              array.findIndex(
-                (item) =>
-                  item.name.toLowerCase() === car.name.toLowerCase()
-              )
-          );
+      setCars(apiCars);
+      setSortBy("");
+    } catch (err) {
+      console.error(err);
 
-        if (allCars.length === 0) {
-          throw new Error('No vehicles were returned by the API.');
-        }
+      setCars([]);
 
-        setCars(allCars);
-      } catch (err) {
-        console.error('Car API Error:', err);
-        setError('Unable to load cars from the API.');
-      } finally {
-        setLoading(false);
-      }
-    };
+      setError(
+        "Something went wrong while searching. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchCars();
-  }, []);
+  // ==========================================
+  // GO BACK TO FEATURED CARS
+  // ==========================================
 
-  const filteredCars = cars
-    .filter((car) =>
-      car.name.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (sortBy === 'newest') {
+  const handleBackToFeatured = () => {
+    setCars([]);
+    setSearch("");
+    setError("");
+    setSortBy("");
+  };
+
+  // ==========================================
+  // SORT CARS
+  // ==========================================
+
+  const displayedCars =
+    cars.length > 0 ? cars : staticCars;
+
+  const sortedCars = [...displayedCars].sort(
+    (a, b) => {
+      if (sortBy === "newest") {
         return b.year - a.year;
       }
 
-      if (sortBy === 'oldest') {
+      if (sortBy === "oldest") {
         return a.year - b.year;
       }
 
+      if (sortBy === "price-low") {
+        return a.price - b.price;
+      }
+
+      if (sortBy === "price-high") {
+        return b.price - a.price;
+      }
+
       return 0;
+    }
+  );
+
+  // ==========================================
+  // FAVORITES
+  // ==========================================
+
+  const handleFavoriteToggle = (car) => {
+    setFavorites((previous) => {
+      const alreadyFavorite = previous.some(
+        (item) => item.id === car.id
+      );
+
+      if (alreadyFavorite) {
+        return previous.filter(
+          (item) => item.id !== car.id
+        );
+      }
+
+      return [...previous, car];
     });
+  };
+
+  // ==========================================
+  // RECENTLY VIEWED
+  // ==========================================
+
+  const handleViewed = (car) => {
+    setRecentlyViewed((previous) => {
+      const filtered = previous.filter(
+        (item) => item.id !== car.id
+      );
+
+      return [car, ...filtered].slice(0, 6);
+    });
+  };
+
+  // ==========================================
+  // HOME PAGE
+  // ==========================================
+
+  const Home = () => {
+    return (
+      <>
+        {/* ====================================
+            HERO SECTION
+        ==================================== */}
+
+        <section className="hero hero-honda">
+          <div className="hero-content">
+
+            <h1>
+              CarHub: Designed for Your Drive
+            </h1>
+
+            <p>
+              Discover modern vehicles, compare
+              trims, and build the garage that fits
+              your life.
+            </p>
+
+            {/* SEARCH BAR */}
+
+            <form
+              className="search-box hero-search"
+              onSubmit={(event) => {
+                event.preventDefault();
+                handleSearch();
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Search by make (Honda, Toyota, BMW)..."
+                value={search}
+                onChange={(event) =>
+                  setSearch(event.target.value)
+                }
+              />
+
+              <button
+                type="submit"
+                disabled={loading}
+              >
+                {loading
+                  ? "Searching..."
+                  : "Search Inventory"}
+              </button>
+            </form>
+
+            {/* SEARCH EXAMPLES */}
+
+            <div className="hero-tags">
+              <span>EV & Hybrid</span>
+              <span>Family SUVs</span>
+              <span>Sport Sedans</span>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ====================================
+            CAR SECTION
+        ==================================== */}
+
+        <section className="cars">
+
+          {/* ==================================
+              HEADING + ACTIONS
+          ================================== */}
+
+          <div className="cars-heading">
+
+            <div>
+              <h2>
+                {cars.length > 0
+                  ? "Search Results"
+                  : "Featured Cars"}
+              </h2>
+
+              <p>
+                {cars.length > 0
+                  ? `${cars.length} vehicles found`
+                  : "Explore popular vehicles"}
+              </p>
+            </div>
+
+            <div className="cars-actions">
+
+              {/* BACK BUTTON */}
+
+              {cars.length > 0 && (
+                <button
+                  className="back-btn"
+                  onClick={handleBackToFeatured}
+                  type="button"
+                >
+                  ← Back to Featured Cars
+                </button>
+              )}
+
+              {/* SORT */}
+
+              <select
+                className="sort-select"
+                value={sortBy}
+                onChange={(event) =>
+                  setSortBy(event.target.value)
+                }
+              >
+                <option value="">
+                  Sort Cars
+                </option>
+
+                <option value="newest">
+                  Year: Newest First
+                </option>
+
+                <option value="oldest">
+                  Year: Oldest First
+                </option>
+
+                <option value="price-low">
+                  Price: Low to High
+                </option>
+
+                <option value="price-high">
+                  Price: High to Low
+                </option>
+              </select>
+
+            </div>
+          </div>
+
+          {/* ==================================
+              ERROR MESSAGE
+          ================================== */}
+
+          {error && (
+            <div className="search-error">
+              {error}
+            </div>
+          )}
+
+          {/* ==================================
+              LOADING
+          ================================== */}
+
+          {loading && (
+            <div className="loading-message">
+              Searching for vehicles...
+            </div>
+          )}
+
+          {/* ==================================
+              CAR CARDS
+          ================================== */}
+
+          {!loading && (
+            <div className="car-list">
+
+              {sortedCars.map((car) => (
+                <CarCard
+                  key={car.id}
+                  car={car}
+                  onFavoriteToggle={
+                    handleFavoriteToggle
+                  }
+                  onViewed={handleViewed}
+                  isFavorite={favorites.some(
+                    (favorite) =>
+                      favorite.id === car.id
+                  )}
+                />
+              ))}
+
+            </div>
+          )}
+
+        </section>
+
+        {/* ====================================
+            FAVORITES + RECENTLY VIEWED
+        ==================================== */}
+
+        <section className="about">
+
+          <div className="garage-summary">
+
+            {/* FAVORITES */}
+
+            <div>
+              <h3>Your Favorites</h3>
+
+              {favorites.length === 0 ? (
+                <p>
+                  No favorite cars yet.
+                </p>
+              ) : (
+                <ul>
+                  {favorites.map((car) => (
+                    <li key={car.id}>
+                      {car.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* RECENTLY VIEWED */}
+
+            <div>
+              <h3>Recently Viewed</h3>
+
+              {recentlyViewed.length === 0 ? (
+                <p>
+                  No recently viewed cars.
+                </p>
+              ) : (
+                <ul>
+                  {recentlyViewed.map((car) => (
+                    <li key={car.id}>
+                      {car.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+            </div>
+
+          </div>
+
+        </section>
+      </>
+    );
+  };
+
+  // ==========================================
+  // APP ROUTES
+  // ==========================================
 
   return (
     <Router basename="/Car-Project">
-      <div className="App">
-        <header className="navbar">
-          <h1>CarHub</h1>
 
-          <nav>
-            <Link to="/">Home</Link>
-            <a href="#cars">Cars</a>
-            <a href="#about">About</a>
-          </nav>
-        </header>
+      <div className="App">
+
+        <Navbar />
 
         <main>
+
           <Routes>
+
+            {/* HOME */}
+
             <Route
               path="/"
-              element={
-                <>
-                  <section className="hero" id="home">
-                    <h2>Find Your Perfect Car</h2>
-
-                    <p>
-                      Search and explore cars from around the world.
-                    </p>
-
-                    <form
-                      className="search-box"
-                      onSubmit={(e) => e.preventDefault()}
-                    >
-                      <input
-                        type="text"
-                        placeholder="Search for a car..."
-                        value={search}
-                        onChange={(event) =>
-                          setSearch(event.target.value)
-                        }
-                      />
-
-                      <button type="submit">Search</button>
-                    </form>
-                  </section>
-
-                  <section className="cars" id="cars">
-                    <div className="cars-heading">
-                      <h2>Featured Cars</h2>
-
-                      <select
-                        className="sort-select"
-                        value={sortBy}
-                        onChange={(event) =>
-                          setSortBy(event.target.value)
-                        }
-                        aria-label="Sort cars by year"
-                      >
-                        <option value="">Sort Cars</option>
-
-                        <option value="newest">
-                          Year: Newest First
-                        </option>
-
-                        <option value="oldest">
-                          Year: Oldest First
-                        </option>
-                      </select>
-                    </div>
-
-                    {loading && (
-                      <p className="no-results">
-                        Loading cars from API...
-                      </p>
-                    )}
-
-                    {error && (
-                      <p className="no-results">
-                        {error}
-                      </p>
-                    )}
-
-                    {!loading && !error && (
-                      <div className="car-list">
-                        {filteredCars.length > 0 ? (
-                          filteredCars.map((car) => (
-                            <CarCard
-                              key={car.id}
-                              car={car}
-                            />
-                          ))
-                        ) : (
-                          <p className="no-results">
-                            No cars found.
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </section>
-
-                  <section className="about" id="about">
-                    <h2>About CarHub</h2>
-
-                    <p>
-                      Your premier destination to explore modern
-                      vehicles and specifications.
-                    </p>
-                  </section>
-                </>
-              }
+              element={<Home />}
             />
+
+            {/* CAR DETAILS */}
 
             <Route
               path="/car/:id"
-              element={<CarDetails cars={cars} />}
+              element={
+                <CarDetails
+                  cars={sortedCars}
+                  favorites={favorites}
+                  onFavoriteToggle={
+                    handleFavoriteToggle
+                  }
+                  onViewed={handleViewed}
+                />
+              }
             />
+
+            {/* EXPLORE */}
+
+            <Route
+              path="/explore"
+              element={<Explore />}
+            />
+
+            {/* GARAGE */}
+
+            <Route
+              path="/garage"
+              element={
+                <Garage
+                  favorites={favorites}
+                  recentlyViewed={
+                    recentlyViewed
+                  }
+                />
+              }
+            />
+
+            {/* COMPARE */}
+
+            <Route
+              path="/compare"
+              element={
+                <CompareCars
+                  cars={sortedCars}
+                  favorites={favorites}
+                />
+              }
+            />
+
+            {/* REVIEWS */}
+
+            <Route
+              path="/reviews"
+              element={<Reviews />}
+            />
+
+            {/* FUEL CALCULATOR */}
+
+            <Route
+              path="/fuel"
+              element={<FuelCalculator />}
+            />
+
           </Routes>
+
         </main>
 
+        {/* ====================================
+            FOOTER
+        ==================================== */}
+
         <footer>
-          <p>© 2026 CarHub. All rights reserved.</p>
+          <p>
+            © 2026 CarHub. All rights reserved.
+          </p>
         </footer>
+
       </div>
+
     </Router>
   );
 }
+
+export default App;

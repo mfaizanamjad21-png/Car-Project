@@ -1,316 +1,130 @@
-/* =========================
-   GLOBAL STYLES
-========================= */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root {
+  --accent: #007bff;
+  --accent-hover: #005fcc;
+  --card-bg: #fff;
+  --text-secondary: #555;
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-html {
-  scroll-behavior: smooth;
+/* Honda-style hero */
+.hero-honda {
+  background: url("https://images.unsplash.com/photo-1503376780353-7e6692767b70") center/cover no-repeat;
+  padding: 120px 40px;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f6f8;
-  color: #222;
+.hero-content {
+  max-width: 600px;
 }
 
-.App {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* =========================
-   NAVBAR
-========================= */
-
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 8%;
-  background-color: #111827;
-  color: white;
-}
-
-.navbar h1 {
-  font-size: 28px;
-}
-
-.navbar nav {
-  display: flex;
-  gap: 25px;
-}
-
-.navbar a {
-  color: white;
-  text-decoration: none;
-  font-size: 16px;
-  transition: color 0.3s ease;
-}
-
-.navbar a:hover {
-  color: #38bdf8;
-}
-
-/* =========================
-   MAIN
-========================= */
-
-main {
-  flex: 1;
-}
-
-/* =========================
-   HERO SECTION
-========================= */
-
-.hero {
-  text-align: center;
-  padding: 100px 20px;
-  background: linear-gradient(135deg, #1e293b, #0f172a);
-  color: white;
-}
-
-.hero h2 {
+.hero-content h1 {
   font-size: 48px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
-.hero p {
-  max-width: 600px;
-  margin: 0 auto 30px;
-  font-size: 18px;
-  line-height: 1.6;
-  color: #cbd5e1;
+.hero-content p {
+  font-size: 20px;
+  margin-bottom: 20px;
 }
 
-/* =========================
-   SEARCH BOX
-========================= */
-
-.search-box {
+.hero-search {
   display: flex;
-  justify-content: center;
-  max-width: 600px;
-  margin: 0 auto;
+  gap: 10px;
 }
 
-.search-box input {
-  width: 100%;
-  padding: 15px 20px;
+.hero-search input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
   border: none;
-  outline: none;
-  font-size: 16px;
-  border-radius: 8px 0 0 8px;
 }
 
-.search-box button {
-  padding: 15px 25px;
+.hero-search button {
+  padding: 12px 20px;
+  background: var(--accent);
+  color: #fff;
   border: none;
-  background-color: #38bdf8;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 0 8px 8px 0;
-  transition: background-color 0.3s ease;
+  border-radius: 8px;
 }
 
-.search-box button:hover {
-  background-color: #0ea5e9;
+.hero-tags {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
 }
 
-/* =========================
-   CARS SECTION
-========================= */
+.hero-tags span {
+  background: rgba(255,255,255,0.2);
+  padding: 8px 14px;
+  border-radius: 6px;
+}
 
+/* Featured cars */
 .cars {
-  padding: 80px 8%;
+  padding: 40px;
 }
 
 .cars-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 40px;
 }
-
-.cars-heading h2 {
-  font-size: 36px;
-}
-
-/* =========================
-   SORT SELECT
-========================= */
 
 .sort-select {
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background-color: white;
-  color: #222;
-  font-size: 16px;
-  cursor: pointer;
-  outline: none;
+  padding: 8px;
+  border-radius: 6px;
 }
-
-.sort-select:focus {
-  border-color: #38bdf8;
-}
-
-/* =========================
-   CAR LIST
-========================= */
 
 .car-list {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
 }
 
-/* =========================
-   NO RESULTS
-========================= */
-
-.no-results {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 40px;
-  font-size: 20px;
-  color: #666;
-}
-
-/* =========================
-   ABOUT SECTION
-========================= */
-
+/* About */
 .about {
-  padding: 80px 20px;
+  padding: 40px;
   text-align: center;
-  background-color: white;
 }
 
-.about h2 {
-  margin-bottom: 20px;
-  font-size: 36px;
+.cars-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.about p {
-  max-width: 600px;
-  margin: 0 auto;
-  font-size: 17px;
-  line-height: 1.7;
-  color: #555;
-}
-
-/* =========================
-   FOOTER
-========================= */
-
-footer {
-  padding: 25px;
-  text-align: center;
-  background-color: #111827;
+.back-btn {
+  border: none;
+  background: #111;
   color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.2s ease;
 }
 
-/* =========================
-   TABLET
-========================= */
-
-@media (max-width: 900px) {
-  .hero h2 {
-    font-size: 40px;
-  }
-
-  .car-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .cars-heading {
-    gap: 20px;
-  }
+.back-btn:hover {
+  background: #333;
 }
 
-/* =========================
-   MOBILE
-========================= */
+.back-btn:active {
+  transform: scale(0.97);
+}
 
-@media (max-width: 600px) {
-  .navbar {
-    flex-direction: column;
-    gap: 15px;
-    padding: 20px;
-  }
+.loading-message {
+  text-align: center;
+  padding: 30px;
+  font-size: 16px;
+}
 
-  .navbar nav {
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .hero {
-    padding: 70px 20px;
-  }
-
-  .hero h2 {
-    font-size: 32px;
-  }
-
-  .hero p {
-    font-size: 16px;
-  }
-
-  .search-box {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .search-box input {
-    border-radius: 8px;
-  }
-
-  .search-box button {
-    width: 100%;
-    border-radius: 8px;
-  }
-
-  .cars {
-    padding: 50px 20px;
-  }
-
-  .cars-heading {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 20px;
-  }
-
-  .cars-heading h2 {
-    text-align: center;
-    font-size: 30px;
-  }
-
-  .sort-select {
-    width: 100%;
-  }
-
-  .car-list {
-    grid-template-columns: 1fr;
-  }
-
-  .about {
-    padding: 60px 20px;
-  }
-
-  .about h2 {
-    font-size: 30px;
-  }
-
-  footer {
-    padding: 20px;
-  }
+.search-error {
+  margin: 20px 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #ffecec;
+  color: #c00;
 }

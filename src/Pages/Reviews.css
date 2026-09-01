@@ -1,0 +1,22 @@
+.reviews-page {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.reviews-list {
+  display: grid;
+  gap: 20px;
+}
+
+.review-card {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.rating {
+  color: var(--accent);
+  font-weight: 600;
+}

@@ -1,0 +1,15 @@
+.garage-container {
+  max-width: 900px;
+  margin: 40px auto;
+  text-align: center;
+}
+
+.garage-container h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.garage-container p {
+  color: var(--text-secondary);
+  font-size: 18px;
+}

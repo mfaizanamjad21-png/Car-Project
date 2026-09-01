@@ -1,0 +1,32 @@
+.fuel-page {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.fuel-form {
+  display: grid;
+  gap: 20px;
+}
+
+.fuel-form input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.fuel-form button {
+  padding: 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+}
+
+.fuel-result {
+  margin-top: 20px;
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+}

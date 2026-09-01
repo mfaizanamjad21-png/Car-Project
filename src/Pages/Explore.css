@@ -1,0 +1,56 @@
+.explore-container {
+  padding: 40px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.explore-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.explore-header h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.explore-header p {
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.explore-search {
+  width: 60%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.explore-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 30px;
+}
+
+.explore-section h2 {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.explore-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.explore-section li {
+  margin: 6px 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.explore-section li:hover {
+  color: var(--accent);
+}
