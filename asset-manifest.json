@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/Car-Project/static/css/main.dc5b9269.css",
-    "main.js": "/Car-Project/static/js/main.83a2d52e.js",
+    "main.css": "/Car-Project/static/css/main.613c8523.css",
+    "main.js": "/Car-Project/static/js/main.ad3a3098.js",
     "static/js/453.9e236697.chunk.js": "/Car-Project/static/js/453.9e236697.chunk.js",
     "index.html": "/Car-Project/index.html",
-    "main.dc5b9269.css.map": "/Car-Project/static/css/main.dc5b9269.css.map",
-    "main.83a2d52e.js.map": "/Car-Project/static/js/main.83a2d52e.js.map",
+    "main.613c8523.css.map": "/Car-Project/static/css/main.613c8523.css.map",
+    "main.ad3a3098.js.map": "/Car-Project/static/js/main.ad3a3098.js.map",
     "453.9e236697.chunk.js.map": "/Car-Project/static/js/453.9e236697.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.dc5b9269.css",
-    "static/js/main.83a2d52e.js"
+    "static/css/main.613c8523.css",
+    "static/js/main.ad3a3098.js"
   ]
 }
